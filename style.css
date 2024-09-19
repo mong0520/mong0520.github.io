@@ -1,0 +1,98 @@
+/* style.css */
+
+/* 全局樣式 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f9f9f9;
+}
+h1 {
+    text-align: center;
+}
+textarea {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    font-size: 14px;
+    box-sizing: border-box;
+    resize: vertical;
+}
+button {
+    padding: 10px 20px;
+    margin: 10px 5px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+}
+button:hover {
+    background-color: #45a049;
+}
+.options {
+    margin: 20px 0;
+}
+.options label {
+    margin-right: 15px;
+    font-size: 16px;
+}
+
+/* 警告訊息樣式 */
+.warning {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* 卡片展示區域樣式 */
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin-bottom: 10px; /* 增加卡片組之間的間距 */
+}
+.card {
+    flex: 0 0 10%; /* 將每張卡片的寬度從10%改為8% */
+    text-align: center;
+    box-sizing: border-box;
+    margin: 2px; /* 減小間隔至5px */
+    position: relative; /* 為數量信息做定位 */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.card img {
+    max-width: 80%; /* 將圖片的最大寬度從100%改為80% */
+    height: auto;
+    border-radius: 3px;
+}
+.quantity-overlay {
+    position: absolute;
+    bottom: 5px; /* 距離底部5px */
+    left: 5px;   /* 距離左邊5px */
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 2px 5px;
+    font-size: 14px; /* 調整字體大小 */
+    border-radius: 3px;
+    display: flex;
+    align-items: center; /* 垂直居中 */
+    justify-content: center; /* 水平居中 */
+}
+h2 {
+    margin-top: 30px;
+    margin-bottom: 10px;
+    font-size: 24px;
+    color: #333;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 5px;
+}
+iframe {
+    width: 100%;
+    height: 1000px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
