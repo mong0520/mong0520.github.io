@@ -4,94 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PTCG Live to HTML generator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
-        }
-        h1 {
-            text-align: center;
-        }
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 10px;
-            font-size: 14px;
-            box-sizing: border-box;
-            resize: vertical;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 10px 5px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            color: white;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        #preview {
-            margin-top: 20px;
-            background-color: white;
-            padding: 20px;
-            border: 1px solid #ccc;
-        }
-        .cards {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-        }
-        .card {
-            flex: 0 0 10%; /* 每張圖片占據10%的寬度 */
-            text-align: center;
-            box-sizing: border-box;
-            margin: 10px;
-            position: relative; /* 為數量信息做定位 */
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .card img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 3px;
-        }
-        .quantity-overlay {
-            position: absolute;
-            bottom: 5px; /* 距離底部5px */
-            left: 5px;   /* 距離左邊5px */
-            background: rgba(0, 0, 0, 0.7);
-            color: #fff;
-            padding: 2px 5px;
-            font-size: 14px; /* 調整字體大小 */
-            border-radius: 3px;
-            display: flex;
-            align-items: center; /* 垂直居中 */
-            justify-content: center; /* 水平居中 */
-            /* width: calc(100% - 10px); 移除固定寬度 */
-        }
-        iframe {
-            width: 100%;
-            height: 500px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .warning {
-            color: red;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-    </style>
+    <!-- 引用外部 CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>PTCG Live to HTML generator</h1>
-    <p>請在下方的文本框中輸入原始卡片數據，然後點擊「生成 HTML」按鈕來生成相應的卡片展示頁面。</p>
+    <p>請在下方的文本框中輸入原始卡片數據，然後選擇展示方式，最後點擊「生成 HTML」按鈕來生成相應的卡片展示頁面。</p>
+
+    <!-- 展示方式選項 -->
+    <div class="options">
+        <label>
+            <input type="radio" name="displayOption" value="together" checked>
+            一起展示
+        </label>
+        <label>
+            <input type="radio" name="displayOption" value="separate">
+            分開展示
+        </label>
+    </div>
+
     <textarea id="rawData" placeholder="在此處輸入原始數據...">
 Pokémon: 13
 2 Pidgeot ex PAF 221
@@ -234,84 +165,77 @@ Total Cards: 60
         }
 
         // 生成卡片的 HTML 元素
-        function generateCardsHTML(data) {
-            let cardsHTML = '<div class="cards">';
+        function generateCardsHTML(data, displayOption) {
+            let cardsHTML = '';
 
-            function addCardsToHTML(cards) {
-                for (let card of cards) {
-                    const name = escapeHTML(card['name']);
-                    const page_url = escapeHTML(card['page_url']);
-                    const card_img_url = escapeHTML(card['card_img_url']);
-                    const quantity = card['quantity'];
+            if (displayOption === 'separate') {
+                function addCardsToHTML(cards, category) {
+                    if (cards.length > 0) {
+                        cardsHTML += `<h2>${category}</h2>`;
+                        cardsHTML += '<div class="cards">';
+                        for (let card of cards) {
+                            const name = escapeHTML(card['name']);
+                            const page_url = escapeHTML(card['page_url']);
+                            const card_img_url = escapeHTML(card['card_img_url']);
+                            const quantity = card['quantity'];
 
-                    cardsHTML += `
-        <div class="card">
-            <a target="_blank" href="${page_url}"><img src="${card_img_url}" alt="${name}"></a>
-            <div class="quantity-overlay">${quantity}</div>
-        </div>
-    `;
+                            cardsHTML += `
+                                <div class="card">
+                                    <a target="_blank" href="${page_url}"><img src="${card_img_url}" alt="${name}"></a>
+                                    <div class="quantity-overlay">${quantity}</div>
+                                </div>
+                            `;
+                        }
+                        cardsHTML += '</div>';
+                    }
+                }
+
+                // 按照 Pokémon、Trainer、Energy 的順序添加卡片
+                addCardsToHTML(data['pokemon'], 'Pokémon');
+                addCardsToHTML(data['trainer'], 'Trainer');
+                addCardsToHTML(data['energy'], 'Energy');
+            } else if (displayOption === 'together') {
+                let allCards = [];
+
+                // 合併所有類型的卡片
+                allCards = [...data['pokemon'], ...data['trainer'], ...data['energy']];
+
+                if (allCards.length > 0) {
+                    cardsHTML += '<div class="cards">';
+                    for (let card of allCards) {
+                        const name = escapeHTML(card['name']);
+                        const page_url = escapeHTML(card['page_url']);
+                        const card_img_url = escapeHTML(card['card_img_url']);
+                        const quantity = card['quantity'];
+
+                        cardsHTML += `
+                            <div class="card">
+                                <a target="_blank" href="${page_url}"><img src="${card_img_url}" alt="${name}"></a>
+                                <div class="quantity-overlay">${quantity}</div>
+                            </div>
+                        `;
+                    }
+                    cardsHTML += '</div>';
                 }
             }
 
-            // 添加不同類型的卡片
-            addCardsToHTML(data['pokemon']);
-            addCardsToHTML(data['trainer']);
-            addCardsToHTML(data['energy']);
-
-            cardsHTML += '</div>';
             return cardsHTML;
         }
 
         // 生成完整的 HTML 預覽
-        function generateHTMLContent(data) {
+        function generateHTMLContent(data, displayOption) {
             let htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Card Collection</title>
-    <style>
-        .cards {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-        }
-        .card {
-            flex: 0 0 10%; /* 每張圖片占據10%的寬度 */
-            text-align: center;
-            box-sizing: border-box;
-            margin: 1px; /* 減小間隔至1px */
-            position: relative; /* 為數量信息做定位 */
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .card img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 3px;
-        }
-        .quantity-overlay {
-            position: absolute;
-            bottom: 5px; /* 距離底部5px */
-            left: 5px;   /* 距離左邊5px */
-            background: rgba(0, 0, 0, 0.7);
-            color: #fff;
-            padding: 2px 5px;
-            font-size: 14px; /* 調整字體大小 */
-            border-radius: 3px;
-            display: flex;
-            align-items: center; /* 垂直居中 */
-            justify-content: center; /* 水平居中 */
-        }
-    </style>
+    <!-- 引用外部 CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="cards">
-    ${generateCardsHTML(data)}
+    <div class="cards-section">
+    ${generateCardsHTML(data, displayOption)}
     </div>
 </body>
 </html>
@@ -321,13 +245,12 @@ Total Cards: 60
 
         // 顯示生成的 HTML 預覽
         function displayPreview(generatedHTML) {
-    const previewDiv = document.getElementById('preview');
-    previewDiv.innerHTML = `
-        <h2>生成的卡片展示：</h2>
-        <iframe srcdoc="${escapeHTML(generatedHTML)}" style="width:100%; height:1000px; border:1px solid #ccc; border-radius:1px;"></iframe>
-    `;
-}
-
+            const previewDiv = document.getElementById('preview');
+            previewDiv.innerHTML = `
+                <h2>生成的卡片展示：</h2>
+                <iframe srcdoc="${escapeHTML(generatedHTML)}"></iframe>
+            `;
+        }
 
         // 主函數，處理生成和顯示
         document.getElementById('generateBtn').addEventListener('click', () => {
@@ -351,8 +274,11 @@ Total Cards: 60
                 warningDiv.textContent = `警告：計算出的總卡片數量 (${data['total_cards']}) 與原始數據中的總數量 (${total_cards_raw}) 不一致。`;
             }
 
+            // 獲取用戶選擇的展示方式
+            const displayOption = document.querySelector('input[name="displayOption"]:checked').value;
+
             // 生成 HTML 內容
-            const generatedHTML = generateHTMLContent(data);
+            const generatedHTML = generateHTMLContent(data, displayOption);
 
             // 顯示 HTML 預覽
             displayPreview(generatedHTML);
